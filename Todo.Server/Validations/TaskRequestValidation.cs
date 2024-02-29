@@ -11,6 +11,5 @@ public class TaskRequestValidation : AbstractValidator<TaskRequestDto>
         RuleFor(t => t.Description).NotEmpty().NotNull();
         RuleFor(t => t.CreatedAt).NotEmpty().NotNull();
         RuleFor(t => t.IsCompleted).NotNull();
-        RuleFor(t => t.UserId).NotNull();
     }
 }

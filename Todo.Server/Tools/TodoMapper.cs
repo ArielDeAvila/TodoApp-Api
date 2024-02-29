@@ -15,4 +15,16 @@ public static class TodoMapper
             CreatedAt = DateTime.UtcNow
         };
     }
+
+    public static NoteTask MapTask(TaskRequestDto task)
+    {
+        return new NoteTask
+        {
+            Title = task.Title,
+            Description = task.Description!,
+            CreatedAt = DateTime.Parse(task.CreatedAt!),
+            IsCompleted = (bool)task.IsCompleted!,
+            IsCanceled = false,
+        };
+    }
 }

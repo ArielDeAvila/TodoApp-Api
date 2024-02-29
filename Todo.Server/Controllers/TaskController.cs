@@ -1,6 +1,4 @@
-﻿using Azure;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using Todo.Server.DTO;
@@ -9,6 +7,7 @@ using Todo.Server.Tools;
 
 namespace Todo.Server.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class TaskController : ControllerBase
@@ -20,20 +19,21 @@ public class TaskController : ControllerBase
         _taskService = taskService;
     }
 
-    [Authorize]
     [HttpGet]
     [Route("GetAll")]
     public async Task<IActionResult> GetAllByUser()
     {
-        var uniqueNameclaim = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.UniqueName);
+        var uniqueNameclaim = User.Claims
+                                .FirstOrDefault(c =>
+                                c.Properties.Values.Contains(JwtRegisteredClaimNames.UniqueName));
 
         if (uniqueNameclaim is null) return BadRequest(new BaseResponse<bool>
         {
             Success = false,
-            Message = ReplyMessage.MESSAGE_FAILED
+            Message = ReplyMessage.MESSAGE_INVALID_TOKEN
         });
 
-        int userId = int.Parse(uniqueNameclaim.Value);
+        int userId = int.Parse(uniqueNameclaim!.Value);
 
         var response = await _taskService.GetAllTasks(userId);
 
@@ -47,24 +47,23 @@ public class TaskController : ControllerBase
         }
     }
 
-    [Authorize]
     [HttpPost]
     [Route("Create")]
     public async Task<IActionResult> CreateTask([FromBody] TaskRequestDto task)
     {
-        var uniqueNameclaim = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.UniqueName);
+        var uniqueNameclaim = User.Claims
+                                .FirstOrDefault(c =>
+                                c.Properties.Values.Contains(JwtRegisteredClaimNames.UniqueName));
 
-        if (uniqueNameclaim is null) return BadRequest(new BaseResponse<bool>
+        if (uniqueNameclaim is null) return Unauthorized(new BaseResponse<bool>
         {
             Success = false,
-            Message = ReplyMessage.MESSAGE_FAILED
+            Message = ReplyMessage.MESSAGE_INVALID_TOKEN
         });
 
         int userId = int.Parse(uniqueNameclaim.Value);
 
-        task.UserId = userId;
-
-        var response = await _taskService.CreateTask(task);
+        var response = await _taskService.CreateTask(task, userId);
 
         if (response.Success)
         {
@@ -76,7 +75,6 @@ public class TaskController : ControllerBase
         }
     }
 
-    [Authorize]
     [HttpPatch]
     [Route("Complete/id")]
     public async Task<IActionResult> CompleteTask(int id)
@@ -93,7 +91,6 @@ public class TaskController : ControllerBase
         }
     }
 
-    [Authorize]
     [HttpDelete]
     [Route("Delete/id")]
     public async Task<IActionResult> DeleteTask(int id)

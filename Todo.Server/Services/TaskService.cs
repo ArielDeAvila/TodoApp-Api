@@ -44,10 +44,10 @@ public class TaskService : ITaskService
 
     }
 
-    public async Task<BaseResponse<bool>> CreateTask(TaskRequestDto task)
+    public async Task<BaseResponse<bool>> CreateTask(TaskRequestDto taskDto, int userId)
     {
         var response = new BaseResponse<bool>();
-        var validate = await _validator.ValidateAsync(task);
+        var validate = await _validator.ValidateAsync(taskDto);
 
         if (!validate.IsValid)
         {
@@ -57,7 +57,11 @@ public class TaskService : ITaskService
             return response;
         }
 
-        _unitOfWork.TaskRepository.Create((NoteTask)task);
+        NoteTask task = TodoMapper.MapTask(taskDto);
+
+        task.UserId = userId;
+
+        _unitOfWork.TaskRepository.Create(task);
 
         var save = await _unitOfWork.CommitAsync();
 

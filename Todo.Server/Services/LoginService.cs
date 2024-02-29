@@ -61,7 +61,9 @@ public class LoginService : ILoginService
 
     private string GenerateToken(User user)
     {
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]!));
+        var securityKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(_configuration.GetValue<string>("Jwt:SecretKey")! )
+            );
 
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
@@ -70,15 +72,17 @@ public class LoginService : ILoginService
             new(JwtRegisteredClaimNames.FamilyName, user.UserName),
             new(JwtRegisteredClaimNames.GivenName, user.Email),
             new(JwtRegisteredClaimNames.UniqueName, user.Id.ToString()),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new(JwtRegisteredClaimNames.Iat, Guid.NewGuid().ToString()),
+            new(JwtRegisteredClaimNames.Jti, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()),
+            new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()),
         };
 
         var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Issuer"],
+                issuer: _configuration.GetValue<string>("Jwt:Issuer"),
+                audience: _configuration.GetValue<string>("Jwt:Audience"),
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(int.Parse(_configuration["Jwt:Expires"]!)),
+                expires: DateTime.UtcNow.AddHours(
+                    int.Parse(_configuration.GetValue<string>("Jwt:Expires")!)
+                    ),
                 notBefore: DateTime.UtcNow,
                 signingCredentials: credentials
             );
