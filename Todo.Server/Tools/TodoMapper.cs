@@ -27,4 +27,16 @@ public static class TodoMapper
             IsCanceled = false,
         };
     }
+
+    public static TaskResponseDto MapTaskResponse(NoteTask task)
+    {
+        return new TaskResponseDto
+        {
+            Id = task.Id,
+            Title = task.Title,
+            Description = task.Description,
+            IsCompleted = task.IsCompleted,
+            CreatedAt = task.CreatedAt
+        };
+    }
 }

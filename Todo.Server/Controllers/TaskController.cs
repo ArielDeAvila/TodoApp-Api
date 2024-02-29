@@ -76,8 +76,8 @@ public class TaskController : ControllerBase
     }
 
     [HttpPatch]
-    [Route("Complete/id")]
-    public async Task<IActionResult> CompleteTask(int id)
+    [Route("Complete/{id}")]
+    public async Task<IActionResult> CompleteTask([FromRoute]int id)
     {
         var response = await _taskService.CompleteTask(id);
 
@@ -92,8 +92,8 @@ public class TaskController : ControllerBase
     }
 
     [HttpDelete]
-    [Route("Delete/id")]
-    public async Task<IActionResult> DeleteTask(int id)
+    [Route("Delete/{id}")]
+    public async Task<IActionResult> DeleteTask([FromRoute]int id)
     {
         var response = await _taskService.DeleteTask(id);
 

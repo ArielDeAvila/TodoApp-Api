@@ -24,10 +24,10 @@ public class TaskService : ITaskService
 
         var tasks = await _unitOfWork.TaskRepository.GetAll(userId);
 
-        if (tasks is not null)
+        if (tasks is not null && tasks.Any())
         {
             var tasksDto = new List<TaskResponseDto>();
-            foreach (var task in tasks) tasksDto.Add((TaskResponseDto)task);
+            foreach (var task in tasks) tasksDto.Add(TodoMapper.MapTaskResponse(task));
 
             response.Success = true;
             response.Data = tasksDto;
